@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 
 function startLoop(deps){
-  const { renderer, scene, camera, composer, player, env, sky, world, orbit, input } = deps;
+  const { renderer, scene, camera, composer, player, env, sky, world, orbit, input, stats } = deps;
 
   const camTarget = new THREE.Vector3().copy(player.state.pos).setY(1.42);
   const camPos = new THREE.Vector3();
@@ -44,8 +44,10 @@ function startLoop(deps){
     camera.lookAt(camTarget);
 
     sky.update(dt, camera.position);
+    if (stats) stats.beginFrame();
     if (composer) composer.render();
     else renderer.render(scene, camera);
+    if (stats) stats.endFrame();
 
     if (++frames === 3) document.getElementById('loading').classList.add('hide');
   }

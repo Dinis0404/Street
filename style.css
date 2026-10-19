@@ -11,6 +11,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0d14;
 @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
 
 #ui{position:fixed;top:16px;right:16px;z-index:20}
+
+#statsPanel{position:fixed;left:16px;bottom:16px;z-index:30;font:12px/1.7 Consolas,Menlo,monospace;
+  color:#d7e4f3;background:rgba(10,14,22,.78);border:1px solid rgba(255,255,255,.14);
+  border-radius:8px;padding:8px 12px;pointer-events:none;white-space:pre}
 #panel{width:302px;background:rgba(13,18,28,.8);backdrop-filter:blur(10px);
   border:1px solid rgba(255,255,255,.12);border-radius:14px;color:#e8eef7;
   box-shadow:0 8px 30px rgba(0,0,0,.35);overflow:hidden}

@@ -3,6 +3,7 @@ import { createRenderer } from './core/renderer.js';
 import { createInput } from './core/input.js';
 import { bindUI } from './core/ui.js';
 import { startLoop } from './core/loop.js';
+import { createStats } from './core/stats.js';
 import { currentSceneId, getScene } from './core/scenes.js';
 import { createSky } from './sky.js';
 import { createCharacter } from './character.js';
@@ -33,4 +34,5 @@ const input = createInput(renderer.domElement, orbit);
 
 bindUI({ env, player, world, orbit, sceneId });
 
-startLoop({ renderer, scene, camera, composer, player, env, sky, world, orbit, input: input.state });
+const stats = createStats(renderer);
+startLoop({ renderer, scene, camera, composer, player, env, sky, world, orbit, input: input.state, stats });
