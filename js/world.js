@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { TAU, rand } from './util.js';
 import { makeCanvasTexture, glowTexture, textTexture } from './factory/tex.js';
-import { mergeGeoms, createSceneKit } from './factory/geo.js';
+import { mergeGeoms, createSceneKit, makeInstanced } from './factory/geo.js';
 import { registerSign, registerWindow, registerLampLight, registerLampGlow, setLampBulb } from './systems/nightlights.js';
 import { createGround } from './city/ground.js';
 
@@ -445,12 +445,15 @@ function createWorld(scene){
     scene.add(fence);
   }
 
-  /* 阻車柱 */
-  for (const bx of [-6, -3, 0, 3, 6]){
-    const b = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.75, 8),
-      new THREE.MeshStandardMaterial({ color: 0xd8b13a, roughness: 0.6 }));
-    b.position.set(bx, 0.5, -6.7);
-    A(b);
+  /* 阻車柱（InstancedMesh 示範：5 柱 1 draw call） */
+  {
+    const bollards = makeInstanced(
+      new THREE.CylinderGeometry(0.06, 0.06, 0.75, 8),
+      new THREE.MeshStandardMaterial({ color: 0xd8b13a, roughness: 0.6 }),
+      [-6, -3, 0, 3, 6].map((bx) => ({ p: [bx, 0.5, -6.7] })),
+      { receiveShadow: true }
+    );
+    scene.add(bollards);
   }
 
   /* 停車場繳費機柱（左側，實景細節） */

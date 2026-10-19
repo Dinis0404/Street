@@ -35,4 +35,28 @@ function createSceneKit(scene){
   return { colliders, snowOverlays, A, addCol, collide };
 }
 
-export { mergeGeoms, createSceneKit };
+/* InstancedMesh 工廠：transforms = [{ p:[x,y,z], rx/ry/rz, s:統一或 [x,y,z] }]
+   opts: { castShadow（預設 true）, receiveShadow（預設 false）} */
+function makeInstanced(geom, mat, transforms, opts){
+  opts = opts || {};
+  const m = new THREE.InstancedMesh(geom, mat, transforms.length);
+  const M = new THREE.Matrix4();
+  const P = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3();
+  const E = new THREE.Euler();
+  for (let i = 0; i < transforms.length; i++){
+    const t = transforms[i];
+    P.set(t.p[0], t.p[1], t.p[2]);
+    E.set(t.rx || 0, t.ry || 0, t.rz || 0);
+    Q.setFromEuler(E);
+    if (Array.isArray(t.s)) S.set(t.s[0], t.s[1], t.s[2]);
+    else S.setScalar(t.s !== undefined ? t.s : 1);
+    M.compose(P, Q, S);
+    m.setMatrixAt(i, M);
+  }
+  m.instanceMatrix.needsUpdate = true;
+  m.castShadow = opts.castShadow !== false;
+  m.receiveShadow = opts.receiveShadow === true;
+  return m;
+}
+
+export { mergeGeoms, createSceneKit, makeInstanced };
