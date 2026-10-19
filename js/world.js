@@ -2,16 +2,15 @@
    佈局（對應實際拍照點）：馬路東西向，店在路北正面朝南，
    停車場在店與馬路之間，富士山從店正後方升起。 */
 import * as THREE from 'three';
-import { TAU, rand, makeCanvasTexture, mergeGeoms, glowTexture, textTexture } from './util.js';
+import { TAU, rand } from './util.js';
+import { makeCanvasTexture, glowTexture, textTexture } from './factory/tex.js';
+import { mergeGeoms, createSceneKit } from './factory/geo.js';
 
 const FUJI = { x: -350, z: -3700, R: 2200, H: 2600 };
 
 function createWorld(scene){
-  const colliders = [];
+  const { colliders, snowOverlays, A, addCol } = createSceneKit(scene);
   const glow = { signMats: [], lampLights: [], lampBulbMat: null, lampGlows: [], windowMats: [] };
-  const snowOverlays = [];
-  const A = (m, cast, recv) => { m.castShadow = cast !== false; m.receiveShadow = recv !== false; scene.add(m); return m; };
-  const addCol = (x1, x2, z1, z2) => colliders.push({ x1, x2, z1, z2 });
 
   const world = {
     colliders, glow, snowOverlays,

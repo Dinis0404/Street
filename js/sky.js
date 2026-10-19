@@ -1,6 +1,7 @@
 /* 天空：漸層天幕、太陽光暈、月亮、星星、雲層 */
 import * as THREE from 'three';
-import { TAU, rand, makeCanvasTexture, cloudTexture, glowTexture } from './util.js';
+import { TAU, rand } from './util.js';
+import { makeCanvasTexture, cloudTexture, glowTexture } from './factory/tex.js';
 
 function createSky(scene){
   const u = {
