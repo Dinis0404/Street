@@ -1,6 +1,7 @@
 /* 信義區場景佔位：灰盒城市量體＋施工中告示牌（P1 起由城市總管 city.js 取代） */
 import * as THREE from 'three';
 import { createSceneKit } from '../factory/geo.js';
+import { createGround } from './ground.js';
 import { textTexture } from '../factory/tex.js';
 
 function createWorld(scene){
@@ -55,13 +56,13 @@ function createWorld(scene){
     A(cone);
   }
 
-  function groundHeightAt(){ return 0; }
+  const groundSys = createGround();   // 佔位場景全區高度 0（避開地面 mesh 的 ground 命名）
 
   return {
     colliders, collide, snowOverlays,
     spawn: new THREE.Vector3(0, 0, 20),
     classic: { pos: new THREE.Vector3(0, 0, 20), yaw: 0, pitch: 0.05, dist: 6 },
-    groundHeightAt,
+    groundHeightAt: groundSys.surfaceHeightAt,
     fujiUniforms: null
   };
 }

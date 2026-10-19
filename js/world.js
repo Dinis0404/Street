@@ -6,6 +6,7 @@ import { TAU, rand } from './util.js';
 import { makeCanvasTexture, glowTexture, textTexture } from './factory/tex.js';
 import { mergeGeoms, createSceneKit } from './factory/geo.js';
 import { registerSign, registerWindow, registerLampLight, registerLampGlow, setLampBulb } from './systems/nightlights.js';
+import { createGround } from './city/ground.js';
 
 const FUJI = { x: -350, z: -3700, R: 2200, H: 2600 };
 
@@ -16,7 +17,7 @@ function createWorld(scene){
     colliders, collide, snowOverlays,
     spawn: new THREE.Vector3(6, 0, 4),
     classic: { pos: new THREE.Vector3(0.6, 0, 7.2), yaw: 0.02, pitch: 0.1, dist: 4.4 },
-    groundHeightAt,
+    groundHeightAt: null,
     fujiUniforms: null
   };
 
@@ -980,19 +981,20 @@ function createWorld(scene){
     }
   }
 
-  /* ================= 邊界 & 地面高度 ================= */
+  /* ================= 邊界 & 可走面 ================= */
   addCol(-122, -119.5, -110, 110);
   addCol(400, 403, -110, 110);
   addCol(-125, 403, -111.5, -109.5);
   addCol(-125, 403, 109.5, 111.5);
 
-  function groundHeightAt(x, z){
-    if (x > -8.6 && x < 8.6 && z > -14.2 && z < -6.4) return 0.152;   // 店前停車場
-    if ((z > 6 && z < 9.3) || (z < -6 && z > -9.3)) return 0.14;      // 人行道
-    if (x > 151.5 && x < 162.5 && z > 10.6 && z < 13.4) return 0.61;  // 棧橋
-    return 0;
-  }
+  /* 可走面（原 groundHeightAt 硬編碼分支遷移；變數名避開地面 mesh 的 ground） */
+  const groundSys = createGround();
+  groundSys.addRect(-8.6, -14.2, 8.6, -6.4, 0.152);     // 店前停車場
+  groundSys.addRect(-122, 6, 122, 9.3, 0.14);           // 南側人行道
+  groundSys.addRect(-122, -9.3, 122, -6, 0.14);         // 北側人行道
+  groundSys.addRect(151.5, 10.6, 162.5, 13.4, 0.61);    // 湖畔棧橋
 
+  world.groundHeightAt = groundSys.surfaceHeightAt;
   return world;
 }
 
