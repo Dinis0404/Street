@@ -5,15 +5,15 @@ import * as THREE from 'three';
 import { TAU, rand } from './util.js';
 import { makeCanvasTexture, glowTexture, textTexture } from './factory/tex.js';
 import { mergeGeoms, createSceneKit } from './factory/geo.js';
+import { registerSign, registerWindow, registerLampLight, registerLampGlow, setLampBulb } from './systems/nightlights.js';
 
 const FUJI = { x: -350, z: -3700, R: 2200, H: 2600 };
 
 function createWorld(scene){
   const { colliders, snowOverlays, A, addCol } = createSceneKit(scene);
-  const glow = { signMats: [], lampLights: [], lampBulbMat: null, lampGlows: [], windowMats: [] };
 
   const world = {
-    colliders, glow, snowOverlays,
+    colliders, snowOverlays,
     spawn: new THREE.Vector3(6, 0, 4),
     classic: { pos: new THREE.Vector3(0.6, 0, 7.2), yaw: 0.02, pitch: 0.1, dist: 4.4 },
     groundHeightAt,
@@ -328,19 +328,17 @@ function createWorld(scene){
     map: glassTex, emissive: 0xffffff, emissiveMap: interiorTex,
     emissiveIntensity: 0.1, roughness: 0.45, metalness: 0.1
   });
-  facadeMat.userData = { day: 0.1, night: 1.3 };
   const facade = new THREE.Mesh(new THREE.PlaneGeometry(17, 2.9), facadeMat);
   facade.position.set(0, 1.52, -13.94);
   A(facade, false, false);
-  glow.signMats.push(facadeMat);
+  registerSign(facadeMat, 0.1, 1.3);
 
   /* 三色橫帶簷板（外凸，有立體感） */
   const fasciaMat = new THREE.MeshStandardMaterial({
     map: fasciaTex, emissive: 0xffffff, emissiveMap: fasciaTex,
     emissiveIntensity: 0.06, roughness: 0.6
   });
-  fasciaMat.userData = { day: 0.06, night: 0.6 };
-  glow.signMats.push(fasciaMat);
+  registerSign(fasciaMat, 0.06, 0.6);
   const white = new THREE.MeshStandardMaterial({ color: 0xd9dcd8, roughness: 0.8 });
   const fascia = new THREE.Mesh(new THREE.BoxGeometry(17.2, 1.03, 0.7),
     [white, white, white, white, fasciaMat, white]);
@@ -348,16 +346,14 @@ function createWorld(scene){
   A(fascia);
   /* 簷板底發光燈槽 */
   const soffitMat = new THREE.MeshStandardMaterial({ color: 0xfff6e6, emissive: 0xfff3da, emissiveIntensity: 0.15, roughness: 0.8 });
-  soffitMat.userData = { day: 0.15, night: 1.5 };
-  glow.signMats.push(soffitMat);
+  registerSign(soffitMat, 0.15, 1.5);
   const soffit = new THREE.Mesh(new THREE.BoxGeometry(16.8, 0.06, 0.66), soffitMat);
   soffit.position.set(0, 2.94, -13.74);
   A(soffit, false, false);
 
   /* 7 識別燈箱（中央偏左 ~42%） */
   const roofSignMat = new THREE.MeshStandardMaterial({ map: logoTex, emissive: 0xffffff, emissiveMap: logoTex, emissiveIntensity: 0.35, roughness: 0.6 });
-  roofSignMat.userData = { day: 0.35, night: 2.2 };
-  glow.signMats.push(roofSignMat);
+  registerSign(roofSignMat, 0.35, 2.2);
   const faciaSign = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.95, 0.22),
     [white, white, white, white, roofSignMat, roofSignMat]);
   faciaSign.position.set(-1.4, 3.48, -13.3);
@@ -405,8 +401,7 @@ function createWorld(scene){
       map: frontTex, emissive: 0xffffff, emissiveMap: frontTex,
       emissiveIntensity: 0.05, roughness: 0.4
     });
-    frontMat.userData = { day: 0.05, night: 1.15 };
-    glow.signMats.push(frontMat);
+    registerSign(frontMat, 0.05, 1.15);
     const front = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.8), frontMat);
     front.position.set(0, 0.95, 0.38);
     grp.add(front);
@@ -490,12 +485,12 @@ function createWorld(scene){
     color: 0x1c2530, roughness: 0.35, metalness: 0.1,
     emissive: 0xffc98a, emissiveIntensity: 0.02
   });
-  glow.windowMats.push(houseWinMat);
+  registerWindow(houseWinMat);
   const shopGlassMat = new THREE.MeshStandardMaterial({
     color: 0x16202a, roughness: 0.3, metalness: 0.2,
     emissive: 0xffcf96, emissiveIntensity: 0.02
   });
-  glow.windowMats.push(shopGlassMat);
+  registerWindow(shopGlassMat);
   const winGeoms = [];
 
   const awningTex = makeCanvasTexture(128, 64, (g) => {
@@ -688,7 +683,7 @@ function createWorld(scene){
   {
     const poleMat = new THREE.MeshStandardMaterial({ color: 0x6a7076, roughness: 0.6, metalness: 0.5 });
     const bulbMat = new THREE.MeshStandardMaterial({ color: 0xfff6e0, emissive: 0xffe9b8, emissiveIntensity: 0.05 });
-    glow.lampBulbMat = bulbMat;
+    setLampBulb(bulbMat);
     const glowTex = glowTexture();
     for (const lx of [-70, -30, 30, 70]){
       const grp = new THREE.Group();
@@ -713,7 +708,7 @@ function createWorld(scene){
       light.position.set(-1.35, 4.85, 0);
       light.userData.base = 2.4;
       grp.add(light);
-      glow.lampLights.push(light);
+      registerLampLight(light);
       const spr = new THREE.Sprite(new THREE.SpriteMaterial({
         map: glowTex, color: 0xffd9a8, transparent: true, opacity: 0,
         blending: THREE.AdditiveBlending, depthWrite: false
@@ -721,7 +716,7 @@ function createWorld(scene){
       spr.scale.set(3.6, 3.6, 1);
       spr.position.set(-1.35, 4.9, 0);
       grp.add(spr);
-      glow.lampGlows.push(spr);
+      registerLampGlow(spr);
       scene.add(grp);
       addCol(lx - 0.22, lx + 0.22, 8.18, 8.62);
     }

@@ -1,6 +1,7 @@
 /* 晝夜系統：時間推進、日月方位、光照、天空/霧色、燈火 */
 import * as THREE from 'three';
 import { clamp, lerp, smoothstep } from '../util.js';
+import * as nightlights from './nightlights.js';
 
 function createDayNight(scene, refs){
   const { world, sky, weather, follow } = refs;
@@ -121,13 +122,9 @@ function createDayNight(scene, refs){
       FU.uSunDir.value.copy(sunI >= moonI ? sunDir : moonDir);
     }
 
-    /* 燈火（黃昏華燈初上 / 夜晚 / 暴雨白天也會亮） */
+    /* 燈火（黃昏華燈初上 / 夜晚 / 暴雨白天也會亮）— 經夜間燈光註冊表全域插值 */
     const lampF = clamp(Math.max(smoothstep(0.42, 0.8, night), golden * 0.55, P.rain * P.gray * 0.5), 0, 1);
-    for (const l of world.glow.lampLights) l.intensity = lampF * l.userData.base;
-    if (world.glow.lampBulbMat) world.glow.lampBulbMat.emissiveIntensity = 0.05 + lampF * 2.4;
-    for (const s of world.glow.lampGlows) s.material.opacity = lampF * 0.8;
-    for (const m of world.glow.signMats) m.emissiveIntensity = m.userData.day + lampF * m.userData.night;
-    for (const m of world.glow.windowMats) m.emissiveIntensity = 0.02 + lampF * 1.15;
+    nightlights.update(lampF);
   }
 
   return {
