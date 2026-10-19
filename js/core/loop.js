@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 
 function startLoop(deps){
-  const { renderer, scene, camera, composer, player, env, sky, world, orbit, input, stats } = deps;
+  const { renderer, scene, camera, composer, player, env, sky, world, orbit, input, stats, flycam } = deps;
 
   const camTarget = new THREE.Vector3().copy(player.state.pos).setY(1.42);
   const camPos = new THREE.Vector3();
@@ -17,31 +17,41 @@ function startLoop(deps){
 
   const clock = new THREE.Clock();
   const desired = new THREE.Vector3();
-  let frames = 0;
+  let frames = 0, wasFlying = false;
 
   function loop(){
     requestAnimationFrame(loop);
     const dt = Math.min(clock.getDelta(), 0.05);
 
-    input.yaw = orbit.yaw;
-    player.update(dt, input, world.colliders, world.groundHeightAt);
+    const flying = flycam ? flycam.update(dt) : false;
+    if (flying && !wasFlying) camPos.copy(camera.position);   // 退出飛行時無縫接回跟隨相機
+    wasFlying = flying;
 
-    desired.copy(player.state.pos);
-    desired.y += 1.42;
-    camTarget.lerp(desired, 1 - Math.exp(-dt * 12));
-    env.follow.copy(camTarget);
+    if (!flying){
+      input.yaw = orbit.yaw;
+      player.update(dt, input, world.colliders, world.groundHeightAt);
+
+      desired.copy(player.state.pos);
+      desired.y += 1.42;
+      camTarget.lerp(desired, 1 - Math.exp(-dt * 12));
+      env.follow.copy(camTarget);
+    } else {
+      env.follow.copy(camera.position);   // 飛行中天氣粒子/光照跟著相機
+    }
 
     env.update(dt);
 
-    const cp = Math.cos(orbit.pitch);
-    desired.set(
-      camTarget.x + Math.sin(orbit.yaw) * cp * orbit.dist,
-      Math.max(camTarget.y + Math.sin(orbit.pitch) * orbit.dist, 0.3),
-      camTarget.z + Math.cos(orbit.yaw) * cp * orbit.dist
-    );
-    camPos.lerp(desired, 1 - Math.exp(-dt * 14));
-    camera.position.copy(camPos);
-    camera.lookAt(camTarget);
+    if (!flying){
+      const cp = Math.cos(orbit.pitch);
+      desired.set(
+        camTarget.x + Math.sin(orbit.yaw) * cp * orbit.dist,
+        Math.max(camTarget.y + Math.sin(orbit.pitch) * orbit.dist, 0.3),
+        camTarget.z + Math.cos(orbit.yaw) * cp * orbit.dist
+      );
+      camPos.lerp(desired, 1 - Math.exp(-dt * 14));
+      camera.position.copy(camPos);
+      camera.lookAt(camTarget);
+    }
 
     sky.update(dt, camera.position);
     if (stats) stats.beginFrame();
