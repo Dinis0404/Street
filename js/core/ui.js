@@ -1,10 +1,18 @@
-/* UI 綁定：時鐘、時間滑桿、快捷鈕、天氣按鈕、機位按鈕、面板收合 */
+/* UI 綁定：地圖切換、時鐘、時間滑桿、快捷鈕、天氣按鈕、機位按鈕、面板收合 */
+import { switchScene } from './scenes.js';
 
 function bindUI(deps){
-  const { env, player, world, orbit } = deps;
+  const { env, player, world, orbit, sceneId } = deps;
   const $ = (id) => document.getElementById(id);
   const clockEl = $('clock'), slider = $('timeSlider'), autoTime = $('autoTime');
   let sliderHeld = false;
+
+  /* 地圖切換 */
+  document.querySelectorAll('.sceneBtn').forEach((b) => {
+    if (b.dataset.s === sceneId) b.classList.add('active');
+    else b.classList.remove('active');
+    b.addEventListener('click', () => { switchScene(b.dataset.s); });
+  });
 
   function fmtTime(h){
     const hh = Math.floor(h) % 24, mm = Math.floor((h % 1) * 60);
