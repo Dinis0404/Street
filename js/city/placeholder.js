@@ -4,7 +4,7 @@ import { createSceneKit } from '../factory/geo.js';
 import { textTexture } from '../factory/tex.js';
 
 function createWorld(scene){
-  const { colliders, snowOverlays, A, addCol } = createSceneKit(scene);
+  const { colliders, collide, snowOverlays, A, addCol } = createSceneKit(scene);
 
   /* 灰盒地面 */
   const groundMat = new THREE.MeshStandardMaterial({ color: 0x878d94, roughness: 1 });
@@ -58,7 +58,7 @@ function createWorld(scene){
   function groundHeightAt(){ return 0; }
 
   return {
-    colliders, snowOverlays,
+    colliders, collide, snowOverlays,
     spawn: new THREE.Vector3(0, 0, 20),
     classic: { pos: new THREE.Vector3(0, 0, 20), yaw: 0, pitch: 0.05, dist: 6 },
     groundHeightAt,

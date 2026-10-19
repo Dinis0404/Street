@@ -65,8 +65,9 @@ function createCharacter(scene){
     pos: new THREE.Vector3(0, 0, 60),
     vy: 0, grounded: true, yaw: 0, phase: 0, speedSm: 0
   };
+  const nearBoxes = [];   // 空間雜湊查詢結果重用
 
-  function update(dt, inp, colliders, groundAt){
+  function update(dt, inp, collisions, groundAt){
     // 輸入 → 相機相對移動方向
     const f = (inp.f ? 1 : 0) - (inp.b ? 1 : 0);
     const r = (inp.r ? 1 : 0) - (inp.l ? 1 : 0);
@@ -94,10 +95,13 @@ function createCharacter(scene){
     if (S.pos.y <= g){ S.pos.y = g; S.vy = 0; S.grounded = true; }
     else if (S.pos.y > g + 0.03) S.grounded = false;
 
-    // 圓形碰撞推離
+    // 圓形碰撞推離（空間雜湊查詢；相容舊式陣列）
     const RR = 0.38;
+    nearBoxes.length = 0;
+    if (collisions.query) collisions.query(S.pos.x, S.pos.z, nearBoxes);
+    else for (let i = 0; i < collisions.length; i++) nearBoxes.push(collisions[i]);
     for (let it = 0; it < 2; it++){
-      for (const c of colliders){
+      for (const c of nearBoxes){
         const nx = clamp(S.pos.x, c.x1, c.x2), nz = clamp(S.pos.z, c.z1, c.z2);
         const dx = S.pos.x - nx, dz = S.pos.z - nz;
         const d2 = dx * dx + dz * dz;

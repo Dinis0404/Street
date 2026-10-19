@@ -10,10 +10,10 @@ import { registerSign, registerWindow, registerLampLight, registerLampGlow, setL
 const FUJI = { x: -350, z: -3700, R: 2200, H: 2600 };
 
 function createWorld(scene){
-  const { colliders, snowOverlays, A, addCol } = createSceneKit(scene);
+  const { colliders, collide, snowOverlays, A, addCol } = createSceneKit(scene);
 
   const world = {
-    colliders, snowOverlays,
+    colliders, collide, snowOverlays,
     spawn: new THREE.Vector3(6, 0, 4),
     classic: { pos: new THREE.Vector3(0.6, 0, 7.2), yaw: 0.02, pitch: 0.1, dist: 4.4 },
     groundHeightAt,

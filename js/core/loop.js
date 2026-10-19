@@ -29,7 +29,7 @@ function startLoop(deps){
 
     if (!flying){
       input.yaw = orbit.yaw;
-      player.update(dt, input, world.colliders, world.groundHeightAt);
+      player.update(dt, input, world.collide || world.colliders, world.groundHeightAt);
 
       desired.copy(player.state.pos);
       desired.y += 1.42;
