@@ -1,9 +1,10 @@
-/* 信義區場景：真實路網階段（T1.2 起）
-   依 district 資料鋪設道路/標線/人行道；101 預定地與施工告示保留 */
+/* 信義區場景：真實路網＋街廓量體階段（T1.2/T1.3）
+   依 district 資料鋪設道路與建築；地標（101/市政府）由專屬建構器接管 */
 import * as THREE from 'three';
 import { createSceneKit } from '../factory/geo.js';
 import { createGround } from './ground.js';
 import { buildRoadNetwork, WALK_H } from './roads.js';
+import { buildBlocks } from './blocks.js';
 import { textTexture } from '../factory/tex.js';
 import * as district from '../data/district.js';
 
@@ -22,7 +23,20 @@ function createWorld(scene){
   scene.add(roadGroup);
   for (const p of walkPolys) groundSys.addPoly(p, WALK_H);
 
-  /* 台北 101 預定地：一格高的灰盒塔 */
+  /* 街廓量體（override 的地標由 T1.5+ 專屬建構器接管） */
+  const generic = district.buildings.filter((b) => !b.override);
+  const { group: blockGroup, count: blockCount } = buildBlocks(generic);
+  scene.add(blockGroup);
+  for (const b of generic){
+    let x1 = 1e9, x2 = -1e9, z1 = 1e9, z2 = -1e9;
+    for (const p of b.poly){
+      if (p[0] < x1) x1 = p[0]; if (p[0] > x2) x2 = p[0];
+      if (p[1] < z1) z1 = p[1]; if (p[1] > z2) z2 = p[1];
+    }
+    if (b.tier <= 2) addCol(x1, x2, z1, z2);
+  }
+
+  /* 台北 101 預定地：一格高的灰盒塔（T1.5 由正式地標取代） */
   const t101 = new THREE.Mesh(new THREE.BoxGeometry(28, 120, 28),
     new THREE.MeshStandardMaterial({ color: 0x9fb0ba, roughness: 0.9 }));
   t101.position.set(-9, 60, -16);
