@@ -1,36 +1,33 @@
-/* 信義區場景佔位：灰盒城市量體＋施工中告示牌（P1 起由城市總管 city.js 取代） */
+/* 信義區場景：真實路網階段（T1.2 起）
+   依 district 資料鋪設道路/標線/人行道；101 預定地與施工告示保留 */
 import * as THREE from 'three';
 import { createSceneKit } from '../factory/geo.js';
 import { createGround } from './ground.js';
+import { buildRoadNetwork, WALK_H } from './roads.js';
 import { textTexture } from '../factory/tex.js';
+import * as district from '../data/district.js';
 
 function createWorld(scene){
   const { colliders, collide, snowOverlays, A, addCol } = createSceneKit(scene);
 
-  /* 灰盒地面 */
-  const groundMat = new THREE.MeshStandardMaterial({ color: 0x878d94, roughness: 1 });
+  /* 基地地面 */
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x7d8288, roughness: 1 });
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), groundMat);
   ground.rotation.x = -Math.PI / 2;
   A(ground, false, true);
 
-  /* 灰盒街廓（信義計畫區量體示意，原點 = 未來台北 101 位置） */
-  const boxMat = new THREE.MeshStandardMaterial({ color: 0xb6bcc4, roughness: 0.95 });
-  const blocks = [
-    [-60, 30, 26, 60, 40], [-60, -50, 30, 46, 24], [50, 40, 30, 56, 55],
-    [55, -45, 26, 40, 18], [-10, 85, 56, 26, 12], [15, -90, 44, 40, 30]
-  ];
-  for (const [x, z, w, d, h] of blocks){
-    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), boxMat);
-    b.position.set(x, h / 2, z);
-    A(b);
-    addCol(x - w / 2, x + w / 2, z - d / 2, z + d / 2);
-  }
+  /* 真實路網（忠孝東路/信義路/基隆路…，含標線與人行道） */
+  const groundSys = createGround();
+  const { group: roadGroup, walkPolys } = buildRoadNetwork(district.roads);
+  scene.add(roadGroup);
+  for (const p of walkPolys) groundSys.addPoly(p, WALK_H);
+
   /* 台北 101 預定地：一格高的灰盒塔 */
   const t101 = new THREE.Mesh(new THREE.BoxGeometry(28, 120, 28),
     new THREE.MeshStandardMaterial({ color: 0x9fb0ba, roughness: 0.9 }));
-  t101.position.set(0, 60, -140);
+  t101.position.set(-9, 60, -16);
   A(t101);
-  addCol(-14, 14, -154, -126);
+  addCol(-23, 5, -30, -2);
 
   /* 施工中告示牌（面向玩家出生點） */
   const signMat = new THREE.MeshStandardMaterial({
@@ -56,12 +53,10 @@ function createWorld(scene){
     A(cone);
   }
 
-  const groundSys = createGround();   // 佔位場景全區高度 0（避開地面 mesh 的 ground 命名）
-
   return {
     colliders, collide, snowOverlays,
-    spawn: new THREE.Vector3(0, 0, 20),
-    classic: { pos: new THREE.Vector3(0, 0, 20), yaw: 0, pitch: 0.05, dist: 6 },
+    spawn: new THREE.Vector3(0, 0, 40),
+    classic: { pos: new THREE.Vector3(0, 0, 40), yaw: 0, pitch: 0.05, dist: 6 },
     groundHeightAt: groundSys.surfaceHeightAt,
     fujiUniforms: null
   };
