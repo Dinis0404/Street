@@ -5,6 +5,7 @@ import { bindUI } from './core/ui.js';
 import { startLoop } from './core/loop.js';
 import { createStats } from './core/stats.js';
 import { createFlyCam } from './core/flycam.js';
+import { createCity } from './city/city.js';
 import { currentSceneId, getScene } from './core/scenes.js';
 import { createSky } from './sky.js';
 import { createCharacter } from './character.js';
@@ -24,6 +25,13 @@ const env = createEnvironment(scene, { world, sky, quality: isLowEnd ? 'low' : '
 /* 載入文字依地圖置換 */
 document.querySelector('#loading .box').textContent = sceneDef.loadingText;
 
+/* 城市串流總管（?chunks=1 註冊 12 個假 chunk 做串流驗證） */
+const city = createCity(scene);
+if (new URLSearchParams(location.search).get('chunks') === '1'){
+  import('./city/testchunks.js').then((m) => m.registerTestChunks(city));
+  window.__city = city;   // 開發觀察用
+}
+
 /* 玩家初始位置：經典機位（店正面 + 背後富士山） */
 player.state.pos.copy(world.classic.pos);
 player.state.yaw = 0;
@@ -37,4 +45,4 @@ bindUI({ env, player, world, orbit, sceneId });
 
 const stats = createStats(renderer);
 const flycam = createFlyCam(camera, renderer.domElement);
-startLoop({ renderer, scene, camera, composer, player, env, sky, world, orbit, input: input.state, stats, flycam });
+startLoop({ renderer, scene, camera, composer, player, env, sky, world, orbit, input: input.state, stats, flycam, city });

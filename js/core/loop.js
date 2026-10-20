@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 
 function startLoop(deps){
-  const { renderer, scene, camera, composer, player, env, sky, world, orbit, input, stats, flycam } = deps;
+  const { renderer, scene, camera, composer, player, env, sky, world, orbit, input, stats, flycam, city } = deps;
 
   const camTarget = new THREE.Vector3().copy(player.state.pos).setY(1.42);
   const camPos = new THREE.Vector3();
@@ -40,6 +40,9 @@ function startLoop(deps){
     }
 
     env.update(dt);
+
+    /* 城市串流：依玩家（或飛行相機）位置載入/休眠 chunk */
+    if (city) city.update(env.follow.x, env.follow.z);
 
     if (!flying){
       const cp = Math.cos(orbit.pitch);
