@@ -250,4 +250,49 @@ function sidePolyFromRibbon(path, offset, halfW){
   return left.concat(right.reverse());
 }
 
-export { buildRoadNetwork, WIDTH, WALK_W, WALK_H };
+/* 只算人行道可走面多邊形（不建幾何；chunk 全域註冊用） */
+function walkPolysFor(roads){
+  const out = [];
+  for (const road of roads){
+    const ww = WALK_W[road.class] || 0;
+    if (ww <= 0 || road.path.length < 2) continue;
+    const halfW = (WIDTH[road.class] || WIDTH.lane) / 2;
+    for (const side of [1, -1]){
+      out.push(sidePolyFromRibbon(road.path, side * (halfW + ww / 2), ww / 2));
+    }
+  }
+  return out;
+}
+
+/* 依 150m chunk 切分路網（段中點歸屬；跨格 way 拆成子路） */
+const CHUNK = 150;
+function splitRoadsForChunks(roads){
+  const map = new Map();
+  for (const road of roads){
+    const path = road.path;
+    if (path.length < 2) continue;
+    let curKey = null, curPath = null;
+    const flush = () => {
+      if (curPath && curPath.length >= 2){
+        const arr = map.get(curKey) || [];
+        arr.push(Object.assign({}, road, { path: curPath }));
+        map.set(curKey, arr);
+      }
+    };
+    for (let i = 0; i < path.length - 1; i++){
+      const a = path[i], b = path[i + 1];
+      const key = Math.floor((a[0] + b[0]) / 2 / CHUNK) + ',' + Math.floor((a[1] + b[1]) / 2 / CHUNK);
+      if (key !== curKey){
+        flush();
+        curKey = key;
+        curPath = [a, b];
+      } else {
+        curPath.push(b);
+      }
+    }
+    flush();
+  }
+  return map;
+}
+
+export { buildRoadNetwork, walkPolysFor, splitRoadsForChunks, WIDTH, WALK_W, WALK_H };

@@ -14,10 +14,19 @@ import { createEnvironment } from './environment.js';
 const app = document.getElementById('app');
 const { renderer, scene, camera, composer, isLowEnd } = createRenderer(app);
 
-/* 場景選擇（URL ?scene= 直達，預設河口湖） */
+/* 場景選擇（URL ?scene= 直達，預設河口湖）；城市串流總管先建好再傳入場景工廠 */
 const sceneId = currentSceneId();
 const sceneDef = getScene(sceneId);
-const world = sceneDef.create(scene);
+const city = createCity(scene);
+let world;
+try {
+  world = sceneDef.create(scene, { city });
+} catch (e){
+  document.querySelector('#loading .box').textContent = '⚠ 場景建立失敗：' + e.message;
+  console.error(e);
+  throw e;
+}
+window.__city = city;   // 開發觀察用（串流計數）
 const sky = createSky(scene);
 const player = createCharacter(scene);
 const env = createEnvironment(scene, { world, sky, quality: isLowEnd ? 'low' : 'high' });
@@ -25,11 +34,9 @@ const env = createEnvironment(scene, { world, sky, quality: isLowEnd ? 'low' : '
 /* 載入文字依地圖置換 */
 document.querySelector('#loading .box').textContent = sceneDef.loadingText;
 
-/* 城市串流總管（?chunks=1 註冊 12 個假 chunk 做串流驗證） */
-const city = createCity(scene);
+/* ?chunks=1：河口湖場景加 12 個假 chunk 做串流驗證 */
 if (new URLSearchParams(location.search).get('chunks') === '1'){
   import('./city/testchunks.js').then((m) => m.registerTestChunks(city));
-  window.__city = city;   // 開發觀察用
 }
 
 /* 玩家初始位置：經典機位（店正面 + 背後富士山） */
