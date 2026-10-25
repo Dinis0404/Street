@@ -8,7 +8,7 @@ import { buildRoadNetwork, walkPolysFor, splitRoadsForChunks, WALK_H } from './r
 import { buildBlocks } from './blocks.js';
 import { createTaipei101 } from '../landmarks/taipei101.js';
 import { createCityHall } from '../landmarks/cityhall.js';
-import { textTexture } from '../factory/tex.js';
+import { createSisyVillage } from '../landmarks/sisy-village.js';
 import * as district from '../data/district.js';
 import { PHOTO_SPOTS } from '../data/photoSpots.js';
 
@@ -70,33 +70,11 @@ function createWorld(scene, ctx){
   const cityhall = district.buildings.find((b) => b.override === 'cityhall');
   if (cityhall) createCityHall(scene, addCol, groundSys, cityhall);
 
-  /* 施工告示（出生點東側，面向玩家） */
-  const signMat = new THREE.MeshStandardMaterial({
-    map: textTexture('🚧 四四南村 整建中', '#f7c948', '#2b2f36', 1024, 256, 96),
-    roughness: 0.8
-  });
-  const sign = new THREE.Mesh(new THREE.PlaneGeometry(10, 2.5), signMat);
-  sign.position.set(163, 2.5, 260);
-  sign.rotation.y = -Math.PI / 2;   // 面向西側出生點
-  A(sign, false, false);
-  const legMat = new THREE.MeshStandardMaterial({ color: 0x5a6068, roughness: 0.7, metalness: 0.3 });
-  for (const lz of [256, 264]){
-    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.6, 8), legMat);
-    leg.position.set(163, 1.3, lz);
-    A(leg);
-  }
-  addCol(162.6, 163.4, 255.6, 264.4);
+  /* 四四南村（S 級地標：連棟黑瓦平房＋草坪望 101，全案第一打卡點） */
+  createSisyVillage(scene, addCol);
 
-  /* 交通錐 */
-  for (const [cx2, cz2] of [[156, 266], [156, 254], [160, 260]]){
-    const cone = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.2, 0.55, 8),
-      new THREE.MeshStandardMaterial({ color: 0xe8641e, roughness: 0.7 }));
-    cone.position.set(cx2, 0.28, cz2);
-    A(cone);
-  }
-
-  /* 出生點：四四南村草坪一帶（避開信義運動中心量體），北望 101 */
-  const spawn = new THREE.Vector3(150, 0, 260);
+  /* 出生點：四四南村草坪，北望 101 */
+  const spawn = new THREE.Vector3(148, 0, 200);
   return {
     colliders, collide, snowOverlays,
     spawn: spawn.clone(),
