@@ -6,6 +6,7 @@ import { createSceneKit } from '../factory/geo.js';
 import { createGround } from './ground.js';
 import { buildRoadNetwork, walkPolysFor, splitRoadsForChunks, WALK_H } from './roads.js';
 import { buildBlocks } from './blocks.js';
+import { createTaipei101 } from '../landmarks/taipei101.js';
 import { textTexture } from '../factory/tex.js';
 import * as district from '../data/district.js';
 
@@ -60,40 +61,36 @@ function createWorld(scene, ctx){
     });
   }
 
-  /* 台北 101 預定地：一格高的灰盒塔（T1.5 由正式地標取代） */
-  const t101 = new THREE.Mesh(new THREE.BoxGeometry(28, 120, 28),
-    new THREE.MeshStandardMaterial({ color: 0x9fb0ba, roughness: 0.9 }));
-  t101.position.set(-9, 60, -16);
-  A(t101);
-  addCol(-23, 5, -30, -2);
+  /* 台北 101（S 級地標，位置＝district footprint 中心） */
+  createTaipei101(scene, addCol, -9, -16);
 
-  /* 施工告示（四四南村預定地旁） */
+  /* 施工告示（出生點東側，面向玩家） */
   const signMat = new THREE.MeshStandardMaterial({
     map: textTexture('🚧 四四南村 整建中', '#f7c948', '#2b2f36', 1024, 256, 96),
     roughness: 0.8
   });
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(10, 2.5), signMat);
-  sign.position.set(196, 2.5, 226);
+  sign.position.set(163, 2.5, 260);
   sign.rotation.y = -Math.PI / 2;   // 面向西側出生點
   A(sign, false, false);
   const legMat = new THREE.MeshStandardMaterial({ color: 0x5a6068, roughness: 0.7, metalness: 0.3 });
-  for (const lz of [222, 230]){
+  for (const lz of [256, 264]){
     const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.6, 8), legMat);
-    leg.position.set(196, 1.3, lz);
+    leg.position.set(163, 1.3, lz);
     A(leg);
   }
-  addCol(195.6, 196.4, 221.6, 230.4);
+  addCol(162.6, 163.4, 255.6, 264.4);
 
   /* 交通錐 */
-  for (const [cx2, cz2] of [[188, 232], [188, 220], [192, 226]]){
+  for (const [cx2, cz2] of [[156, 266], [156, 254], [160, 260]]){
     const cone = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.2, 0.55, 8),
       new THREE.MeshStandardMaterial({ color: 0xe8641e, roughness: 0.7 }));
     cone.position.set(cx2, 0.28, cz2);
     A(cone);
   }
 
-  /* 出生點：四四南村草坪，北望 101（classic 同點位構圖） */
-  const spawn = new THREE.Vector3(184, 0, 240);
+  /* 出生點：四四南村草坪一帶（避開信義運動中心量體），北望 101 */
+  const spawn = new THREE.Vector3(150, 0, 260);
   return {
     colliders, collide, snowOverlays,
     spawn: spawn.clone(),

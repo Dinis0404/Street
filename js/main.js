@@ -44,6 +44,12 @@ player.state.pos.copy(world.classic.pos);
 player.state.yaw = 0;
 env.follow.copy(world.classic.pos).setY(1.4);
 
+/* ?t=小時：直接指定初始時間（開發/自動驗證用） */
+{
+  const tParam = parseFloat(new URLSearchParams(location.search).get('t'));
+  if (isFinite(tParam) && tParam >= 0 && tParam <= 24) env.setTime(tParam);
+}
+
 /* 相機軌道（初始 = 經典機位） */
 const orbit = { yaw: world.classic.yaw, pitch: world.classic.pitch, dist: world.classic.dist };
 const input = createInput(renderer.domElement, orbit);
