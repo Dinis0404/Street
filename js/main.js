@@ -52,6 +52,15 @@ env.follow.copy(world.classic.pos).setY(1.4);
 
 /* 相機軌道（初始 = 經典機位） */
 const orbit = { yaw: world.classic.yaw, pitch: world.classic.pitch, dist: world.classic.dist };
+
+/* ?spot=機位id：直接跳到打卡機位（開發/自動驗證用） */
+{
+  const s = (world.photoSpots || []).find((p) => p.id === new URLSearchParams(location.search).get('spot'));
+  if (s){
+    player.state.pos.set(s.pos[0], s.pos[1], s.pos[2]);
+    orbit.yaw = s.yaw; orbit.pitch = s.pitch; orbit.dist = s.dist;
+  }
+}
 const input = createInput(renderer.domElement, orbit);
 
 bindUI({ env, player, world, orbit, sceneId });

@@ -1,5 +1,6 @@
-/* UI 綁定：地圖切換、時鐘、時間滑桿、快捷鈕、天氣按鈕、機位按鈕、面板收合 */
+/* UI 綁定：地圖切換、時鐘、時間滑桿、快捷鈕、天氣按鈕、打卡機位、面板收合 */
 import { switchScene } from './scenes.js';
+import { setupPhotoSpots } from '../systems/photospots.js';
 
 function bindUI(deps){
   const { env, player, world, orbit, sceneId } = deps;
@@ -44,12 +45,8 @@ function bindUI(deps){
       b.blur();
     });
   });
-  $('classicBtn').addEventListener('click', (e) => {
-    player.state.pos.copy(world.classic.pos);
-    player.state.vy = 0;
-    orbit.yaw = world.classic.yaw; orbit.pitch = world.classic.pitch; orbit.dist = world.classic.dist;
-    e.target.blur();
-  });
+  /* 打卡機位下拉選單（world.photoSpots） */
+  setupPhotoSpots(world, player, orbit);
   $('resetBtn').addEventListener('click', (e) => {
     player.state.pos.copy(world.spawn);
     player.state.vy = 0;

@@ -7,8 +7,10 @@ import { createGround } from './ground.js';
 import { buildRoadNetwork, walkPolysFor, splitRoadsForChunks, WALK_H } from './roads.js';
 import { buildBlocks } from './blocks.js';
 import { createTaipei101 } from '../landmarks/taipei101.js';
+import { createCityHall } from '../landmarks/cityhall.js';
 import { textTexture } from '../factory/tex.js';
 import * as district from '../data/district.js';
+import { PHOTO_SPOTS } from '../data/photoSpots.js';
 
 const CHUNK = 150;
 
@@ -64,6 +66,10 @@ function createWorld(scene, ctx){
   /* 台北 101（S 級地標，位置＝district footprint 中心） */
   createTaipei101(scene, addCol, -9, -16);
 
+  /* 台北市政府（S 級地標：實際 footprint＋市民廣場） */
+  const cityhall = district.buildings.find((b) => b.override === 'cityhall');
+  if (cityhall) createCityHall(scene, addCol, groundSys, cityhall);
+
   /* 施工告示（出生點東側，面向玩家） */
   const signMat = new THREE.MeshStandardMaterial({
     map: textTexture('🚧 四四南村 整建中', '#f7c948', '#2b2f36', 1024, 256, 96),
@@ -95,6 +101,7 @@ function createWorld(scene, ctx){
     colliders, collide, snowOverlays,
     spawn: spawn.clone(),
     classic: { pos: spawn.clone(), yaw: 0.05, pitch: 0.12, dist: 5.5 },
+    photoSpots: PHOTO_SPOTS,
     groundHeightAt: groundSys.surfaceHeightAt,
     fujiUniforms: null
   };

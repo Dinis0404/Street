@@ -17,6 +17,7 @@ function createWorld(scene){
     colliders, collide, snowOverlays,
     spawn: new THREE.Vector3(6, 0, 4),
     classic: { pos: new THREE.Vector3(0.6, 0, 7.2), yaw: 0.02, pitch: 0.1, dist: 4.4 },
+    photoSpots: [{ id: 'classic', name: '📸 經典機位', pos: [0.6, 0, 7.2], yaw: 0.02, pitch: 0.1, dist: 4.4 }],
     groundHeightAt: null,
     fujiUniforms: null
   };
