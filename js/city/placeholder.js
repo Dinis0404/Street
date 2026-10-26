@@ -9,6 +9,7 @@ import { buildBlocks } from './blocks.js';
 import { createTaipei101 } from '../landmarks/taipei101.js';
 import { createCityHall } from '../landmarks/cityhall.js';
 import { createSisyVillage } from '../landmarks/sisy-village.js';
+import { buildMalls, mallIds } from '../landmarks/malls.js';
 import * as district from '../data/district.js';
 import { PHOTO_SPOTS } from '../data/photoSpots.js';
 
@@ -16,6 +17,8 @@ const CHUNK = 150;
 
 function createWorld(scene, ctx){
   const { colliders, collide, snowOverlays, A, addCol } = createSceneKit(scene);
+  const animators = [];   // 場景動畫掛點（廣告牆換檔等）
+  const mallIdSet = new Set(mallIds());
 
   /* 基地地面 */
   const groundMat = new THREE.MeshStandardMaterial({ color: 0x7d8288, roughness: 1 });
@@ -27,7 +30,7 @@ function createWorld(scene, ctx){
   const groundSys = createGround();
   for (const p of walkPolysFor(district.roads)) groundSys.addPoly(p, WALK_H);
 
-  const generic = district.buildings.filter((b) => !b.override);
+  const generic = district.buildings.filter((b) => !b.override && !mallIdSet.has(b.id));
   for (const b of generic){
     if (b.tier > 2) continue;
     let x1 = 1e9, x2 = -1e9, z1 = 1e9, z2 = -1e9;
@@ -73,10 +76,13 @@ function createWorld(scene, ctx){
   /* 四四南村（S 級地標：連棟黑瓦平房＋草坪望 101，全案第一打卡點） */
   createSisyVillage(scene, addCol);
 
+  /* 百貨群（S 級：新光三越 A4/A8/A9/A11、ATT＋威秀、Bellavita） */
+  buildMalls(scene, addCol, district.buildings, animators);
+
   /* 出生點：四四南村草坪，北望 101 */
   const spawn = new THREE.Vector3(148, 0, 200);
   return {
-    colliders, collide, snowOverlays,
+    colliders, collide, snowOverlays, animators,
     spawn: spawn.clone(),
     classic: { pos: spawn.clone(), yaw: 0.05, pitch: 0.12, dist: 5.5 },
     photoSpots: PHOTO_SPOTS,

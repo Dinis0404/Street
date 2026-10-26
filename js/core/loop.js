@@ -17,7 +17,7 @@ function startLoop(deps){
 
   const clock = new THREE.Clock();
   const desired = new THREE.Vector3();
-  let frames = 0, wasFlying = false;
+  let frames = 0, wasFlying = false, elapsed = 0;
 
   function loop(){
     requestAnimationFrame(loop);
@@ -43,6 +43,12 @@ function startLoop(deps){
 
     /* 城市串流：依玩家（或飛行相機）位置載入/休眠 chunk */
     if (city) city.update(env.follow.x, env.follow.z);
+
+    /* 場景動畫掛點（廣告牆換檔等：world.animators = [(t,dt)=>{}]） */
+    if (world.animators){
+      elapsed += dt;
+      for (const fn of world.animators) fn(elapsed, dt);
+    }
 
     if (!flying){
       const cp = Math.cos(orbit.pitch);
