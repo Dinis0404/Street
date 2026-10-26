@@ -7,6 +7,8 @@ const PHOTO_SPOTS = [
   { id: 'cityhall', name: '📷 市府正面廣場', pos: [-23, 0, -268], yaw: 0, pitch: 0.14, dist: 9 },
   { id: 'songshou', name: '📷 松壽路百貨街', pos: [30, 0, -210], yaw: -1.45, pitch: 0.08, dist: 5 },
   { id: 'skyline', name: '📷 信義路天際線', pos: [60, 0, 150], yaw: 0.12, pitch: 0.38, dist: 6 },
+  { id: 'xinyiW', name: '📷 信義路五段望西', pos: [40, 0, 60], yaw: 1.55, pitch: 0.1, dist: 5 },
+  { id: 'site3', name: '📷 世貿三館工地', pos: [0, 0, 55], yaw: 2.95, pitch: 0.05, dist: 5 },
   { id: 't101up', name: '📷 101 裙樓仰角', pos: [20, 0, 40], yaw: 0.48, pitch: 1.05, dist: 4 }
 ];
 

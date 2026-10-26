@@ -11,6 +11,7 @@ import { createCityHall } from '../landmarks/cityhall.js';
 import { createSisyVillage } from '../landmarks/sisy-village.js';
 import { buildMalls, mallIds } from '../landmarks/malls.js';
 import { buildTowers, towerIds } from '../landmarks/towers.js';
+import { buildTwtc, inSite3, twtcIds } from '../landmarks/twtc.js';
 import * as district from '../data/district.js';
 import { PHOTO_SPOTS } from '../data/photoSpots.js';
 
@@ -18,9 +19,10 @@ const CHUNK = 150;
 
 function createWorld(scene, ctx){
   const { colliders, collide, snowOverlays, A, addCol } = createSceneKit(scene);
-  const animators = [];   // 場景動畫掛點（廣告牆換檔等）
+  const animators = [];   // 場景動畫掛點（廣告牆換檔、塔吊旋轉等）
   const mallIdSet = new Set(mallIds());
   for (const id of towerIds()) mallIdSet.add(id);   // 高層塔一併自通用生成排除
+  for (const id of twtcIds()) mallIdSet.add(id);    // 世貿一館/會議中心
 
   /* 基地地面 */
   const groundMat = new THREE.MeshStandardMaterial({ color: 0x7d8288, roughness: 1 });
@@ -32,7 +34,7 @@ function createWorld(scene, ctx){
   const groundSys = createGround();
   for (const p of walkPolysFor(district.roads)) groundSys.addPoly(p, WALK_H);
 
-  const generic = district.buildings.filter((b) => !b.override && !mallIdSet.has(b.id));
+  const generic = district.buildings.filter((b) => !b.override && !mallIdSet.has(b.id) && !inSite3(b));
   for (const b of generic){
     if (b.tier > 2) continue;
     let x1 = 1e9, x2 = -1e9, z1 = 1e9, z2 = -1e9;
@@ -83,6 +85,9 @@ function createWorld(scene, ctx){
 
   /* 高層塔（S 級：南山廣場斜切頂、統一國際、君悅） */
   buildTowers(scene, addCol, district.buildings);
+
+  /* 世貿群（S 級：一館＋國際會議中心＋三館施工圍籬塔吊） */
+  buildTwtc(scene, addCol, district.buildings, animators);
 
   /* 出生點：四四南村草坪，北望 101 */
   const spawn = new THREE.Vector3(148, 0, 200);
