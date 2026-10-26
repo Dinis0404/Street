@@ -6,6 +6,7 @@ const PHOTO_SPOTS = [
   { id: 'plaza101', name: '📷 市民廣場望 101', pos: [-20, 0, -220], yaw: -0.05, pitch: 0.5, dist: 6 },
   { id: 'cityhall', name: '📷 市府正面廣場', pos: [-23, 0, -268], yaw: 0, pitch: 0.14, dist: 9 },
   { id: 'songshou', name: '📷 松壽路百貨街', pos: [30, 0, -210], yaw: -1.45, pitch: 0.08, dist: 5 },
+  { id: 'skyline', name: '📷 信義路天際線', pos: [60, 0, 150], yaw: 0.12, pitch: 0.38, dist: 6 },
   { id: 't101up', name: '📷 101 裙樓仰角', pos: [20, 0, 40], yaw: 0.48, pitch: 1.05, dist: 4 }
 ];
 

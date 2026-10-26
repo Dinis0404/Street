@@ -10,6 +10,7 @@ import { createTaipei101 } from '../landmarks/taipei101.js';
 import { createCityHall } from '../landmarks/cityhall.js';
 import { createSisyVillage } from '../landmarks/sisy-village.js';
 import { buildMalls, mallIds } from '../landmarks/malls.js';
+import { buildTowers, towerIds } from '../landmarks/towers.js';
 import * as district from '../data/district.js';
 import { PHOTO_SPOTS } from '../data/photoSpots.js';
 
@@ -19,6 +20,7 @@ function createWorld(scene, ctx){
   const { colliders, collide, snowOverlays, A, addCol } = createSceneKit(scene);
   const animators = [];   // 場景動畫掛點（廣告牆換檔等）
   const mallIdSet = new Set(mallIds());
+  for (const id of towerIds()) mallIdSet.add(id);   // 高層塔一併自通用生成排除
 
   /* 基地地面 */
   const groundMat = new THREE.MeshStandardMaterial({ color: 0x7d8288, roughness: 1 });
@@ -78,6 +80,9 @@ function createWorld(scene, ctx){
 
   /* 百貨群（S 級：新光三越 A4/A8/A9/A11、ATT＋威秀、Bellavita） */
   buildMalls(scene, addCol, district.buildings, animators);
+
+  /* 高層塔（S 級：南山廣場斜切頂、統一國際、君悅） */
+  buildTowers(scene, addCol, district.buildings);
 
   /* 出生點：四四南村草坪，北望 101 */
   const spawn = new THREE.Vector3(148, 0, 200);
