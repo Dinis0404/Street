@@ -13,6 +13,8 @@ import { buildMalls, mallIds } from '../landmarks/malls.js';
 import { buildTowers, towerIds } from '../landmarks/towers.js';
 import { buildTwtc, inSite3, twtcIds } from '../landmarks/twtc.js';
 import { buildSkywalks } from '../landmarks/skywalk.js';
+import { buildMetro } from '../landmarks/metro.js';
+import { buildPlazas } from '../landmarks/plaza.js';
 import * as district from '../data/district.js';
 import { PHOTO_SPOTS } from '../data/photoSpots.js';
 
@@ -24,8 +26,8 @@ function createWorld(scene, ctx){
   const mallIdSet = new Set(mallIds());
   /* 高層塔一併自通用生成排除 */
   for (const id of towerIds()) mallIdSet.add(id);
-  /* OSM 誤差/特殊 footprint 排除：跨路小樓×3、A8/A9 門廊誤畫×2、市政府站地下街輪廓（T2.5 做）、三館基地碎片 */
-  for (const id of ['w1339401654', 'w1339263128', 'w1339263105', 'w1339401650', 'w1339824913', 'w1340087857', 'w810557339']) mallIdSet.add(id);
+  /* OSM 誤差/特殊 footprint 排除：跨路小樓×3、A8/A9 門廊誤畫×2、市政府站/象山站地下輪廓、三館基地碎片 */
+  for (const id of ['w1339401654', 'w1339263128', 'w1339263105', 'w1339401650', 'w1339824913', 'w1340087857', 'w810557339', 'w810653312']) mallIdSet.add(id);
   for (const id of twtcIds()) mallIdSet.add(id);    // 世貿一館/會議中心
 
   /* 基地地面 */
@@ -95,6 +97,12 @@ function createWorld(scene, ctx){
 
   /* 空中走廊（跨松高/松壽/忠孝，可走：坡道↔橋面） */
   buildSkywalks(scene, addCol, groundSys);
+
+  /* 捷運出入口（市府/101世貿/象山，POI 真實出口座標） */
+  buildMetro(scene, addCol);
+
+  /* 廣場與幹道細節（LOVE 雕塑、香堤廣場、公車專用道） */
+  buildPlazas(scene, addCol, groundSys);
 
   /* 出生點：四四南村草坪，北望 101 */
   const spawn = new THREE.Vector3(148, 0, 200);
