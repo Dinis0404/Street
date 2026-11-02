@@ -12,6 +12,7 @@ import { createSisyVillage } from '../landmarks/sisy-village.js';
 import { buildMalls, mallIds } from '../landmarks/malls.js';
 import { buildTowers, towerIds } from '../landmarks/towers.js';
 import { buildTwtc, inSite3, twtcIds } from '../landmarks/twtc.js';
+import { buildSkywalks } from '../landmarks/skywalk.js';
 import * as district from '../data/district.js';
 import { PHOTO_SPOTS } from '../data/photoSpots.js';
 
@@ -21,7 +22,10 @@ function createWorld(scene, ctx){
   const { colliders, collide, snowOverlays, A, addCol } = createSceneKit(scene);
   const animators = [];   // 場景動畫掛點（廣告牆換檔、塔吊旋轉等）
   const mallIdSet = new Set(mallIds());
-  for (const id of towerIds()) mallIdSet.add(id);   // 高層塔一併自通用生成排除
+  /* 高層塔一併自通用生成排除 */
+  for (const id of towerIds()) mallIdSet.add(id);
+  /* OSM 誤差/特殊 footprint 排除：跨路小樓×3、A8/A9 門廊誤畫×2、市政府站地下街輪廓（T2.5 做）、三館基地碎片 */
+  for (const id of ['w1339401654', 'w1339263128', 'w1339263105', 'w1339401650', 'w1339824913', 'w1340087857', 'w810557339']) mallIdSet.add(id);
   for (const id of twtcIds()) mallIdSet.add(id);    // 世貿一館/會議中心
 
   /* 基地地面 */
@@ -88,6 +92,9 @@ function createWorld(scene, ctx){
 
   /* 世貿群（S 級：一館＋國際會議中心＋三館施工圍籬塔吊） */
   buildTwtc(scene, addCol, district.buildings, animators);
+
+  /* 空中走廊（跨松高/松壽/忠孝，可走：坡道↔橋面） */
+  buildSkywalks(scene, addCol, groundSys);
 
   /* 出生點：四四南村草坪，北望 101 */
   const spawn = new THREE.Vector3(148, 0, 200);
